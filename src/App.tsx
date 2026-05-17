@@ -224,7 +224,7 @@ function AppContent() {
           transition={{ duration: 1.5, ease: "easeOut" }}
           src="/herooo/heroo.png" 
           alt="NONASHA Wellness" 
-          className="object-cover object-center"
+          className="object-cover object-center w-full h-[900px]"
         />
         {/* <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/20 to-brand-dark/80 lg:bg-gradient-to-r lg:from-brand-dark/80 lg:via-brand-dark/40 lg:to-transparent" /> */}
       </div>
