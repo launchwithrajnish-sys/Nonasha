@@ -93,7 +93,7 @@ function AppContent() {
               <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer text-brand-dark">
                 <Leaf className="text-brand-leaf fill-brand-leaf transition-transform group-hover:rotate-12" size={20} />
                 <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
-                  NONASHA<span className="text-brand-leaf/40">™</span>
+                  NO NASHA<span className="text-brand-leaf/40">™</span>
                 </span>
               </div>
 
