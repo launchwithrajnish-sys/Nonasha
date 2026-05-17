@@ -22,7 +22,7 @@ function AppContent() {
   const [cartItems, setCartItems] = useState<any[]>([
     {
       id: '1',
-      name: 'NONASHA™ Anti Addiction Drops',
+      name: 'NO NASHA™ Anti Addiction Drops',
       price: 599,
       quantity: 1,
       image: '/cartimg/Untitled design (7).png',
@@ -238,7 +238,7 @@ function AppContent() {
             <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer">
               <Leaf className="text-white fill-white transition-transform group-hover:rotate-12" size={20} />
               <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
-                NONASHA<span className="text-white/60">™</span>
+                NO NASHA<span className="text-white/60">™</span>
               </span>
             </div>
 
@@ -712,7 +712,7 @@ function Header({ scrolled, setView, user, openAuth, cartCount, navigateToSectio
           <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer text-brand-dark">
             <Leaf className="text-brand-leaf fill-brand-leaf transition-transform group-hover:rotate-12" size={20} />
             <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
-              NONASHA<span className="text-brand-leaf/40">™</span>
+              NO NASHA<span className="text-brand-leaf/40">™</span>
             </span>
           </div>
 
@@ -769,7 +769,7 @@ function Footer({ setView, navigateToSection }: { setView: (v: any) => void, nav
           <div>
             <div className="flex items-center gap-2 mb-8">
               <Leaf size={32} className="text-white fill-white" />
-              <span className="text-3xl font-black tracking-tighter uppercase">NONASHA</span>
+              <span className="text-3xl font-black tracking-tighter uppercase">NO NASHA</span>
             </div>
             <p className="text-white/30 text-sm font-medium leading-relaxed max-w-xs uppercase tracking-widest">Modern Ayurvedic Solutions for Modern Addictions.</p>
           </div>
@@ -801,7 +801,7 @@ function Footer({ setView, navigateToSection }: { setView: (v: any) => void, nav
           </div>
         </div>
         <div className="pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] font-black uppercase tracking-[0.3em] text-white/10 gap-8">
-           <p>© 2024 NONASHA WELLNESS PRIVATE LIMITED.</p>
+           <p>© 2026 NO NASHA WELLNESS PRIVATE LIMITED.</p>
            <div className="flex gap-8">
               <span>MADE IN INDIA</span>
               <span className="text-white/20">STAY INSPIRED</span>
