@@ -23,7 +23,7 @@ function AppContent() {
     {
       id: '1',
       name: 'NONASHA™ Anti Addiction Drops',
-      price: 799,
+      price: 599,
       quantity: 1,
       image: '/cartimg/Untitled design (7).png',
       size: '30ml bottle'
@@ -224,9 +224,9 @@ function AppContent() {
           transition={{ duration: 1.5, ease: "easeOut" }}
           src="/herooo/heroo.png" 
           alt="NONASHA Wellness" 
-          className="w-full h-full object-cover object-center block m-0 p-0"
+          className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/20 to-brand-dark/80 lg:bg-gradient-to-r lg:from-brand-dark/80 lg:via-brand-dark/40 lg:to-transparent" />
+        {/* <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/20 to-brand-dark/80 lg:bg-gradient-to-r lg:from-brand-dark/80 lg:via-brand-dark/40 lg:to-transparent" /> */}
       </div>
 
       {/* Modern Slim Header */}
