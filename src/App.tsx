@@ -314,7 +314,7 @@ function AppContent() {
               onClick={() => addToCart({
                 id: '1',
                 name: 'NONASHA™ Anti Addiction Drops',
-                price: 799,
+                price: 599,
                 image: '/cartimg/Untitled design (7).png',
                 size: '30ml bottle'
               })} 
