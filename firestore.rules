@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'launchwithrajnish@gmail.com';
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() {
+      return request.resource.data;
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+
+    // Phase 4: Entity Validations
+    
+    function isValidUser(data) {
+      return data.uid == request.auth.uid
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 256
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 1000))
+        && (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100))
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 20))
+        && (!('createdAt' in data) || data.createdAt == request.time);
+    }
+    
+    function isValidAddress(data) {
+      return data.userId == request.auth.uid
+        && data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100
+        && data.address is string && data.address.size() >= 5 && data.address.size() <= 500
+        && data.city is string && data.city.size() >= 2 && data.city.size() <= 100
+        && data.state is string && data.state.size() >= 2 && data.state.size() <= 100
+        && data.zipCode is string && data.zipCode.matches('^[0-9]{6}$')
+        && data.phone is string && data.phone.size() >= 10 && data.phone.size() <= 15
+        && (!('createdAt' in data) || data.createdAt == request.time);
+    }
+    
+    function isValidPayment(data) {
+      return data.cardName is string && data.cardName.size() >= 2 && data.cardName.size() <= 100
+        && data.last4 is string && data.last4.matches('^[0-9]{4}$')
+        && data.expiry is string && data.expiry.matches('^[0-9]{2}/[0-9]{2}$')
+        && data.type is string && data.type.size() <= 20
+        && (!('createdAt' in data) || data.createdAt == request.time);
+    }
+    
+    function isValidOrder(data) {
+      return data.userId == request.auth.uid
+        && data.items is list && data.items.size() > 0 && data.items.size() <= 50
+        && data.total is number 
+        && data.status is string
+        && (!('createdAt' in data) || data.createdAt == request.time);
+    }
+
+    // Rules
+    
+    match /users/{userId} {
+      allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming())
+        && incoming().keys().hasAll(['uid', 'email']);
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming())
+        && (!('createdAt' in incoming()) || incoming().createdAt == existing().createdAt)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['photoURL', 'displayName', 'phone']);
+      
+      match /addresses/{addressId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId) && isValidId(addressId);
+        allow create: if isOwner(userId) && isValidId(addressId) && isValidAddress(incoming())
+          && incoming().keys().hasAll(['userId', 'fullName', 'address', 'city', 'state', 'zipCode', 'phone']);
+        allow update: if isOwner(userId) && isValidId(addressId) && isValidAddress(incoming())
+          && (!('createdAt' in incoming()) || incoming().createdAt == existing().createdAt)
+          && incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'address', 'city', 'state', 'zipCode', 'phone']);
+        allow delete: if isOwner(userId) && isValidId(addressId);
+      }
+      
+      match /payments/{paymentId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId) && isValidId(paymentId);
+        allow create: if isOwner(userId) && isValidId(paymentId) && isValidPayment(incoming())
+          && incoming().keys().hasAll(['cardName', 'last4', 'expiry', 'type']);
+        allow update: if isOwner(userId) && isValidId(paymentId) && isValidPayment(incoming())
+          && (!('createdAt' in incoming()) || incoming().createdAt == existing().createdAt)
+          && incoming().diff(existing()).affectedKeys().hasOnly(['cardName', 'expiry']);
+        allow delete: if isOwner(userId) && isValidId(paymentId);
+      }
+    }
+    
+    match /orders/{orderId} {
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow get: if isAdmin() || (isSignedIn() && isValidId(orderId) && resource.data.userId == request.auth.uid);
+      allow create: if (isSignedIn() || true) && isValidId(orderId) // Allow guest create
+        && (incoming().status == 'Confirmed' || incoming().status == 'Pending')
+        && (incoming().keys().hasAll(['userId', 'items', 'total', 'status', 'shippingAddress', 'paymentMethod']) || 
+            incoming().keys().hasAll(['customerEmail', 'items', 'total', 'status', 'shippingAddress', 'paymentMethod']));
+      allow update: if isAdmin() || (isSignedIn() && isValidId(orderId) && resource.data.userId == request.auth.uid
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+        && existing().status != 'Delivered' && existing().status != 'Cancelled');
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "NONASHA™ PREMIUM",
+  "description": "Luxury Ayurvedic Anti-Addiction Recovery Applet",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
