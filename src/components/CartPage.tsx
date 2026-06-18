@@ -43,6 +43,7 @@ export default function CartPage({ onBack, onSuccess, cartItems, updateQuantity,
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cod'>('cod');
+  const [preferredTimeSlot, setPreferredTimeSlot] = useState<string>('Morning (9 AM - 12 PM)');
 
   useEffect(() => {
     if (user) {
@@ -165,7 +166,11 @@ export default function CartPage({ onBack, onSuccess, cartItems, updateQuantity,
         })),
         total: total,
         status: 'Confirmed',
-        shippingAddress: shippingData,
+        shippingAddress: {
+          ...shippingData,
+          preferredTimeSlot: preferredTimeSlot
+        },
+        preferredTimeSlot: preferredTimeSlot,
         paymentMethod: 'cod',
         createdAt: serverTimestamp()
       };
@@ -505,6 +510,54 @@ export default function CartPage({ onBack, onSuccess, cartItems, updateQuantity,
                                </div>
                              </div>
                           </div>
+                        </div>
+                     </div>
+
+                     {/* Preferred Delivery Time Slot Selection */}
+                     <div className="bg-white p-8 md:p-10 rounded-[40px] border border-neutral-100 shadow-sm mb-8">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/20 mb-8 flex items-center gap-2">
+                          <span className="w-4 h-px bg-neutral-100"></span> 03 Preferred Delivery Time Slot
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                           {[
+                             { id: 'Morning (9 AM - 12 PM)', label: 'Morning', time: '9:00 AM - 12:00 PM', desc: 'Best for home deliveries' },
+                             { id: 'Afternoon (12 PM - 4 PM)', label: 'Afternoon', time: '12:00 PM - 4:00 PM', desc: 'Best for workplace' },
+                             { id: 'Evening (4 PM - 8 PM)', label: 'Evening', time: '4:00 PM - 8:00 PM', desc: 'Great for after-work hours' }
+                           ].map((slot) => {
+                             const isSelected = preferredTimeSlot === slot.id;
+                             return (
+                               <button
+                                 key={slot.id}
+                                 type="button"
+                                 onClick={() => setPreferredTimeSlot(slot.id)}
+                                 className={`p-6 rounded-3xl border transition-all text-left flex flex-col justify-between h-full group ${
+                                   isSelected 
+                                     ? 'border-brand-leaf bg-brand-leaf/[0.02] shadow-md shadow-brand-leaf/5' 
+                                     : 'border-neutral-100 bg-white hover:border-neutral-200 hover:bg-neutral-50/30'
+                                 }`}
+                               >
+                                 <div className="flex justify-between items-center w-full mb-4">
+                                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                     isSelected ? 'bg-brand-leaf text-white' : 'bg-neutral-50 text-neutral-400 group-hover:text-brand-dark'
+                                   }`}>
+                                     <Clock size={20} />
+                                   </div>
+                                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                     isSelected ? 'border-brand-leaf bg-brand-leaf' : 'border-neutral-200 bg-white'
+                                   }`}>
+                                     {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                   </div>
+                                 </div>
+                                 <div>
+                                   <h5 className="font-bold text-base text-brand-dark mb-1">{slot.label}</h5>
+                                   <p className="text-brand-leaf text-[10px] font-black uppercase tracking-widest mb-3">{slot.time}</p>
+                                   <p className="text-[10px] text-brand-dark/40 font-bold uppercase tracking-wide leading-relaxed">
+                                     {slot.desc}
+                                   </p>
+                                 </div>
+                               </button>
+                             );
+                           })}
                         </div>
                      </div>
 

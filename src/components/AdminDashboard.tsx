@@ -3,11 +3,12 @@ import { motion } from 'motion/react';
 import { 
   Package, User, Calendar, MapPin, Phone, Mail, 
   ChevronRight, Search, Filter, Loader2, ArrowLeft,
-  CheckCircle, Clock, XCircle, Trash2
+  CheckCircle, Clock, XCircle, Trash2, Printer
 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../lib/firestoreErrorHandler';
+import PrintInvoiceModal from './PrintInvoiceModal';
 
 interface OrderItem {
   id: string;
@@ -42,6 +43,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   useEffect(() => {
     const ordersRef = collection(db, 'orders');
@@ -252,23 +254,65 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                        </h4>
                        <div className="space-y-6">
                           <div className="flex items-start gap-4">
+                             <Calendar size={16} className="text-brand-leaf mt-1" />
+                             <div>
+                               <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Order Date & Time</p>
+                               <p className="text-sm font-bold">
+                                 {selectedOrder.createdAt ? (
+                                   selectedOrder.createdAt.toDate ? (
+                                     selectedOrder.createdAt.toDate().toLocaleString('en-US', {
+                                       weekday: 'short',
+                                       year: 'numeric',
+                                       month: 'short',
+                                       day: 'numeric',
+                                       hour: '2-digit',
+                                       minute: '2-digit',
+                                       hour12: true
+                                     })
+                                   ) : (
+                                     new Date(selectedOrder.createdAt).toLocaleString('en-US')
+                                   )
+                                 ) : 'Just now'}
+                               </p>
+                             </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                             <Clock size={16} className="text-brand-leaf mt-1" />
+                             <div>
+                               <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Preferred Time Slot</p>
+                               <p className="text-sm font-bold text-brand-leaf">
+                                 {selectedOrder.preferredTimeSlot || (selectedOrder.shippingAddress as any)?.preferredTimeSlot || 'Morning (9 AM - 12 PM)'}
+                               </p>
+                             </div>
+                          </div>
+                          <div className="flex items-start gap-4">
                              <User size={16} className="text-brand-leaf mt-1" />
                              <div>
                                <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Customer</p>
                                <p className="text-sm font-bold">{selectedOrder.shippingAddress?.fullName}</p>
+                               <p className="text-[10px] text-brand-dark/30 font-black uppercase tracking-widest mt-0.5">
+                                 ID: {selectedOrder.userId} {selectedOrder.isGuest ? '(Guest User)' : '(Registered User)'}
+                               </p>
+                             </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                             <Mail size={16} className="text-brand-leaf mt-1" />
+                             <div>
+                               <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Email</p>
+                               <p className="text-sm font-bold">{selectedOrder.customerEmail}</p>
                              </div>
                           </div>
                           <div className="flex items-start gap-4">
                              <Phone size={16} className="text-brand-leaf mt-1" />
                              <div>
-                               <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Contact</p>
+                               <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Contact Phone</p>
                                <p className="text-sm font-bold">{selectedOrder.shippingAddress?.phone}</p>
                              </div>
                           </div>
                           <div className="flex items-start gap-4">
                              <MapPin size={16} className="text-brand-leaf mt-1" />
                              <div>
-                               <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Destination</p>
+                               <p className="text-[10px] font-black text-neutral-300 uppercase tracking-widest mb-1">Destination Address</p>
                                <p className="text-sm font-bold leading-relaxed">
                                  {selectedOrder.shippingAddress?.address}<br />
                                  {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state}<br />
@@ -279,8 +323,21 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                        </div>
                     </div>
 
+                    {/* Print Documents */}
+                    <div className="pt-8 border-t border-neutral-100">
+                       <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-dark/20 mb-4 flex items-center gap-2">
+                         <span className="w-4 h-px bg-neutral-100" /> Documents & Labels
+                       </h4>
+                       <button 
+                         onClick={() => setShowPrintModal(true)}
+                         className="w-full flex items-center justify-center gap-2 bg-brand-leaf hover:bg-brand-leaf/90 text-white font-black uppercase tracking-widest text-[10px] py-4 px-6 rounded-2xl transition-all shadow-lg shadow-brand-leaf/10 hover:shadow-brand-leaf/20 active:translate-y-0.5"
+                       >
+                         <Printer size={14} /> Generate Printable Documents
+                       </button>
+                    </div>
+
                     {/* Actions */}
-                    <div className="pt-8 border-t border-neutral-100 flex flex-wrap gap-3">
+                    <div className="pt-8 border-t border-neutral-100 flex flex-wrap gap-3 font-sans">
                        {['Processing', 'Shipped', 'Delivered', 'Cancelled'].map(status => (
                          <button 
                            key={status}
@@ -314,6 +371,14 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       </div>
+
+      {selectedOrder && (
+        <PrintInvoiceModal 
+          isOpen={showPrintModal} 
+          onClose={() => setShowPrintModal(false)} 
+          order={selectedOrder} 
+        />
+      )}
     </div>
   );
 }

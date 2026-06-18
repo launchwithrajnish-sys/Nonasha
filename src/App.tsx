@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, ArrowRight, Menu, X, Leaf, Zap, Activity, Clock, MapPin, Sparkles, ArrowUpRight, Instagram, Twitter, Facebook, Mail, Phone, Star, Shield, ThumbsUp, Package, UserCircle } from 'lucide-react';
+import { Check, ArrowRight, Menu, X, Leaf, Zap, Activity, Clock, MapPin, Sparkles, ArrowUpRight, Instagram, Twitter, Facebook, Mail, Phone, Star, Shield, ThumbsUp, Package, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import CartPage from './components/CartPage';
 import OrderSuccess from './components/OrderSuccess';
 import OrderTracking from './components/OrderTracking';
@@ -19,11 +19,53 @@ function AppContent() {
   const [activeOrderId, setActiveOrderId] = useState<string>('');
   const adminEmail = 'launchwithrajnish@gmail.com';
   const isAdmin = user?.email === adminEmail;
+
+  const bannerSlides = [
+    {
+      id: 1,
+      image: '/herooo/heroo.png',
+      fallbackImage: 'https://images.unsplash.com/photo-1607619056574-7b8d304f3b24?auto=format&fit=crop&q=80&w=2000',
+      tagline1: 'Gain Clarity',
+      tagline2: 'Manage Cravings',
+      title: 'Ayurvedic Anti \n Addiction Drops',
+      description: 'NONASHA™ combines powerful Ayurvedic herbs to help reduce cravings and restore internal balance — naturally.'
+    },
+    {
+      id: 2,
+      image: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=2000',
+      fallbackImage: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=2000',
+      tagline1: 'Deep Detox',
+      tagline2: 'Zero Chemicals',
+      title: 'Deep Cellular \n Purification',
+      description: 'Formulated with pure bioactive herbal extracts of Brahmi and Giloy to sweep away accumulated systemic toxins.'
+    },
+    {
+      id: 3,
+      image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=2000',
+      fallbackImage: 'https://images.unsplash.com/photo-1607619056574-7b8d304f3b24?auto=format&fit=crop&q=80&w=2000',
+      tagline1: 'Registered Care',
+      tagline2: 'GMP Certified',
+      title: 'Restore Your \n Natural Rhythm',
+      description: 'Approved Ayush regulated natural protocol trusted by thousands to rebuild biological strength.'
+    }
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    if (view !== 'home') return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % bannerSlides.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [view]);
+
   const [cartItems, setCartItems] = useState<any[]>([
     {
       id: '1',
-      name: 'NO NASHA™ Anti Addiction Drops',
-      price: 599,
+      name: 'NONASHA™ Anti Addiction Drops',
+      price: 799,
       quantity: 1,
       image: '/cartimg/Untitled design (7).png',
       size: '30ml bottle'
@@ -93,7 +135,7 @@ function AppContent() {
               <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer text-brand-dark">
                 <Leaf className="text-brand-leaf fill-brand-leaf transition-transform group-hover:rotate-12" size={20} />
                 <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
-                  NO NASHA<span className="text-brand-leaf/40">™</span>
+                  NONASHA<span className="text-brand-leaf/40">™</span>
                 </span>
               </div>
 
@@ -216,17 +258,24 @@ function AppContent() {
     <div className="relative min-h-screen bg-brand-dark font-sans selection:bg-white/20">
       <AIChat />
       <AuthOverlay isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
-      {/* Background Image Wrapper - Full Screen */}
+      {/* Background Image Wrapper - Full Screen Slider */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <motion.img 
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          src="/herooo/heroo.png" 
-          alt="NONASHA Wellness" 
-          className="object-cover object-center w-full h-[900px]"
-        />
-        {/* <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/20 to-brand-dark/80 lg:bg-gradient-to-r lg:from-brand-dark/80 lg:via-brand-dark/40 lg:to-transparent" /> */}
+        <AnimatePresence mode="popLayout">
+          <motion.img 
+            key={currentSlide}
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+            src={imageErrors[currentSlide] ? bannerSlides[currentSlide].fallbackImage : bannerSlides[currentSlide].image}
+            onError={() => {
+              setImageErrors(prev => ({ ...prev, [currentSlide]: true }));
+            }}
+            alt="NONASHA Wellness Banner" 
+            className="w-full h-full object-cover object-center block m-0 p-0 absolute inset-0"
+          />
+        </AnimatePresence>
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/20 to-brand-dark/80 lg:bg-gradient-to-r lg:from-brand-dark/85 lg:via-brand-dark/40 lg:to-transparent" />
       </div>
 
       {/* Modern Slim Header */}
@@ -238,7 +287,7 @@ function AppContent() {
             <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer">
               <Leaf className="text-white fill-white transition-transform group-hover:rotate-12" size={20} />
               <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
-                NO NASHA<span className="text-white/60">™</span>
+                NONASHA<span className="text-white/60">™</span>
               </span>
             </div>
 
@@ -296,34 +345,84 @@ function AppContent() {
 
       {/* Hero Content Area */}
       <main className="relative z-10 mx-auto max-w-[1800px] min-h-screen flex flex-col justify-center pt-32 pb-20 px-10 lg:px-24">
-        <div className="w-full lg:w-1/2 flex flex-col items-start">
-          <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8 pl-0.5 pt-2.5">
-            <motion.span initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 md:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Gain Clarity</motion.span>
-            <motion.span initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 md:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Manage Cravings</motion.span>
-          </div>
-          
-          <motion.h1 initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter text-white mb-8 leading-[0.9]">
-            Ayurvedic Anti <br /> Addiction Drops
-          </motion.h1>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }} className="max-w-sm lg:max-w-md">
-            <p className="text-white/70 text-lg md:text-xl font-medium leading-relaxed mb-10">
-              NONASHA™ combines powerful Ayurvedic herbs to help reduce cravings and restore internal balance — naturally.
-            </p>
-            <motion.button 
-              onClick={() => addToCart({
-                id: '1',
-                name: 'NONASHA™ Anti Addiction Drops',
-                price: 599,
-                image: '/cartimg/Untitled design (7).png',
-                size: '30ml bottle'
-              })} 
-              whileHover={{ scale: 1.02 }} 
-              className="bg-white text-brand-dark px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 shadow-2xl shadow-white/5 transition-all group active:translate-y-1"
+        <div className="w-full lg:w-1/2 flex flex-col items-start relative select-none">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6 }}
+              className="flex flex-col items-start"
             >
-              Order Yours Now <ArrowRight size={18} className="transition-transform group-hover:translate-x-1 underline" />
-            </motion.button>
-          </motion.div>
+              <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8 pl-0.5 pt-2.5">
+                <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 md:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  {bannerSlides[currentSlide].tagline1}
+                </span>
+                <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 md:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  {bannerSlides[currentSlide].tagline2}
+                </span>
+              </div>
+              
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter text-white mb-8 leading-[0.9] whitespace-pre-line">
+                {bannerSlides[currentSlide].title}
+              </h1>
+
+              <div className="max-w-sm lg:max-w-md">
+                <p className="text-white/70 text-lg md:text-xl font-medium leading-relaxed mb-10">
+                  {bannerSlides[currentSlide].description}
+                </p>
+                <div className="flex flex-wrap gap-4 items-center">
+                  <motion.button 
+                    onClick={() => addToCart({
+                      id: '1',
+                      name: 'NONASHA™ Anti Addiction Drops',
+                      price: 799,
+                      image: '/cartimg/Untitled design (7).png',
+                      size: '30ml bottle'
+                    })} 
+                    whileHover={{ scale: 1.02 }} 
+                    className="bg-white text-brand-dark px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 shadow-2xl shadow-white/5 transition-all group active:translate-y-1"
+                  >
+                    Order Yours Now <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Navigation Controls Overlay */}
+          <div className="flex items-center gap-4 mt-12 bg-black/15 backdrop-blur-md p-2 rounded-2xl border border-white/10 shadow-2xl">
+             <button
+               onClick={() => setCurrentSlide(prev => (prev - 1 + bannerSlides.length) % bannerSlides.length)}
+               className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white text-white hover:text-brand-dark flex items-center justify-center transition-all duration-300"
+               title="Previous Slide"
+             >
+                <ChevronLeft size={18} />
+             </button>
+             
+             {/* Slide indicators dot indicator */}
+             <div className="flex items-center gap-2 px-2">
+                {bannerSlides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      currentSlide === idx ? 'bg-white w-6' : 'bg-white/20 hover:bg-white/50'
+                    }`}
+                  />
+                ))}
+             </div>
+
+             <button
+               onClick={() => setCurrentSlide(prev => (prev + 1) % bannerSlides.length)}
+               className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white text-white hover:text-brand-dark flex items-center justify-center transition-all duration-305"
+               title="Next Slide"
+             >
+                <ChevronRight size={18} />
+             </button>
+          </div>
+
         </div>
       </main>
 
@@ -712,7 +811,7 @@ function Header({ scrolled, setView, user, openAuth, cartCount, navigateToSectio
           <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer text-brand-dark">
             <Leaf className="text-brand-leaf fill-brand-leaf transition-transform group-hover:rotate-12" size={20} />
             <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
-              NO NASHA<span className="text-brand-leaf/40">™</span>
+              NONASHA<span className="text-brand-leaf/40">™</span>
             </span>
           </div>
 
@@ -769,7 +868,7 @@ function Footer({ setView, navigateToSection }: { setView: (v: any) => void, nav
           <div>
             <div className="flex items-center gap-2 mb-8">
               <Leaf size={32} className="text-white fill-white" />
-              <span className="text-3xl font-black tracking-tighter uppercase">NO NASHA</span>
+              <span className="text-3xl font-black tracking-tighter uppercase">NONASHA</span>
             </div>
             <p className="text-white/30 text-sm font-medium leading-relaxed max-w-xs uppercase tracking-widest">Modern Ayurvedic Solutions for Modern Addictions.</p>
           </div>
@@ -801,7 +900,7 @@ function Footer({ setView, navigateToSection }: { setView: (v: any) => void, nav
           </div>
         </div>
         <div className="pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] font-black uppercase tracking-[0.3em] text-white/10 gap-8">
-           <p>© 2026 NO NASHA WELLNESS PRIVATE LIMITED.</p>
+           <p>© 2024 NONASHA WELLNESS PRIVATE LIMITED.</p>
            <div className="flex gap-8">
               <span>MADE IN INDIA</span>
               <span className="text-white/20">STAY INSPIRED</span>
