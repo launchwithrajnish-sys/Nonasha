@@ -23,8 +23,8 @@ function AppContent() {
   const bannerSlides = [
     {
       id: 1,
-      image: '/herooo/heroo.png',
-      fallbackImage: '/herooo/heroo.png',
+      image: '/src/assets/images/banner_1_1781785386710.jpg',
+      fallbackImage: '/src/assets/images/banner_1_1781785386710.jpg',
       tagline1: 'Gain Clarity',
       tagline2: 'Manage Cravings',
       title: 'Ayurvedic Anti \n Addiction Drops',
@@ -32,8 +32,8 @@ function AppContent() {
     },
     {
       id: 2,
-      image: '/herooo/heroo.png',
-      fallbackImage: '/herooo/heroo.png',
+      image: '/src/assets/images/banner_2_1781785404701.jpg',
+      fallbackImage: '/src/assets/images/banner_2_1781785404701.jpg',
       tagline1: 'Deep Detox',
       tagline2: 'Zero Chemicals',
       title: 'Deep Cellular \n Purification',
@@ -41,8 +41,8 @@ function AppContent() {
     },
     {
       id: 3,
-      image: '/herooo/heroo.png',
-      fallbackImage: '/herooo/heroo.png',
+      image: '/src/assets/images/banner_1_1781785386710.jpg',
+      fallbackImage: '/src/assets/images/banner_1_1781785386710.jpg',
       tagline1: 'Registered Care',
       tagline2: 'GMP Certified',
       title: 'Restore Your \n Natural Rhythm',
@@ -133,7 +133,10 @@ function AppContent() {
           }`}>
             <div className="px-6 md:px-8 flex items-center justify-between">
               <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer text-brand-dark">
-                <img src="/cartimg/Untitled design (7).png" alt="NONASHA Logo" className="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" />
+                <Leaf className="text-brand-leaf fill-brand-leaf transition-transform group-hover:rotate-12" size={20} />
+                <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
+                  NONASHA<span className="text-brand-leaf/40">™</span>
+                </span>
               </div>
 
               <nav className="hidden md:flex items-center gap-8 lg:gap-12">
@@ -282,7 +285,10 @@ function AppContent() {
         }`}>
           <div className="px-6 md:px-8 flex items-center justify-between text-white">
             <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer">
-              <img src="/cartimg/Untitled design (7).png" alt="NONASHA Logo" className="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" />
+              <Leaf className="text-white fill-white transition-transform group-hover:rotate-12" size={20} />
+              <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
+                NONASHA<span className="text-white/60">™</span>
+              </span>
             </div>
 
             <nav className="hidden md:flex items-center gap-8 lg:gap-12 text-white/50">
@@ -803,7 +809,10 @@ function Header({ scrolled, setView, user, openAuth, cartCount, navigateToSectio
       }`}>
         <div className="px-6 md:px-8 flex items-center justify-between">
           <div onClick={() => setView('home')} className="flex items-center gap-2 group cursor-pointer text-brand-dark">
-            <img src="/cartimg/Untitled design (7).png" alt="NONASHA Logo" className="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" />
+            <Leaf className="text-brand-leaf fill-brand-leaf transition-transform group-hover:rotate-12" size={20} />
+            <span className="text-lg md:text-xl font-extrabold tracking-tighter uppercase">
+              NONASHA<span className="text-brand-leaf/40">™</span>
+            </span>
           </div>
 
           <nav className="hidden md:flex items-center gap-8 lg:gap-12">
@@ -857,8 +866,9 @@ function Footer({ setView, navigateToSection }: { setView: (v: any) => void, nav
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-24 mb-32">
           <div>
-            <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={() => setView('home')}>
-              <img src="/cartimg/Untitled design (7).png" alt="NONASHA Logo" className="h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105 duration-300" />
+            <div className="flex items-center gap-2 mb-8">
+              <Leaf size={32} className="text-white fill-white" />
+              <span className="text-3xl font-black tracking-tighter uppercase">NONASHA</span>
             </div>
             <p className="text-white/30 text-sm font-medium leading-relaxed max-w-xs uppercase tracking-widest">Modern Ayurvedic Solutions for Modern Addictions.</p>
           </div>
