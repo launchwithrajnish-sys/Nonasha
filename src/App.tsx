@@ -23,8 +23,8 @@ function AppContent() {
   const bannerSlides = [
     {
       id: 1,
-      image: '/src/assets/images/banner_1_1781785386710.jpg',
-      fallbackImage: '/src/assets/images/banner_1_1781785386710.jpg',
+      image: '/images/banner_1.jpg',
+      fallbackImage: '/images/banner_1.jpg',
       tagline1: 'Gain Clarity',
       tagline2: 'Manage Cravings',
       title: 'Ayurvedic Anti \n Addiction Drops',
@@ -32,8 +32,8 @@ function AppContent() {
     },
     {
       id: 2,
-      image: '/src/assets/images/banner_2_1781785404701.jpg',
-      fallbackImage: '/src/assets/images/banner_2_1781785404701.jpg',
+      image: '/images/banner_2.jpg',
+      fallbackImage: '/images/banner_2.jpg',
       tagline1: 'Deep Detox',
       tagline2: 'Zero Chemicals',
       title: 'Deep Cellular \n Purification',
@@ -41,8 +41,8 @@ function AppContent() {
     },
     {
       id: 3,
-      image: '/src/assets/images/banner_1_1781785386710.jpg',
-      fallbackImage: '/src/assets/images/banner_1_1781785386710.jpg',
+      image: '/images/banner_1.jpg',
+      fallbackImage: '/images/banner_1.jpg',
       tagline1: 'Registered Care',
       tagline2: 'GMP Certified',
       title: 'Restore Your \n Natural Rhythm',
@@ -496,10 +496,10 @@ function AppContent() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: "Brahmi", role: "Brain Tonic", desc: "Neuro-Support: It targets neurons to calm the nervous system and clear mental fog induced by withdrawals.", img: "/src/assets/images/brahmi_leaf_1779009661642.png" },
-              { title: "Giloy", role: "Immuno-Detox", desc: "Scientific Detoxification: A powerful immunomodulator that actively sweeps chemicals from your bloodstream.", img: "/src/assets/images/giloy_stem_1779009678538.png" },
-              { title: "Amla", role: "Antioxidant", desc: "Cellular Nutrition: The richest source of Vitamin C, acting as a scavenger for free radicals caused by stress.", img: "/src/assets/images/amla_fruit_1779009693697.png" },
-              { title: "Kalmegh", role: "Liver Care", desc: "Vitality Support: Rejuvenates the liver tissues and restores original metabolic pathways for energy.", img: "/src/assets/images/kalmegh_herb_1779009707861.png" }
+              { title: "Brahmi", role: "Brain Tonic", desc: "Neuro-Support: It targets neurons to calm the nervous system and clear mental fog induced by withdrawals.", img: "/images/brahmi_leaf.png" },
+              { title: "Giloy", role: "Immuno-Detox", desc: "Scientific Detoxification: A powerful immunomodulator that actively sweeps chemicals from your bloodstream.", img: "/images/giloy_stem.png" },
+              { title: "Amla", role: "Antioxidant", desc: "Cellular Nutrition: The richest source of Vitamin C, acting as a scavenger for free radicals caused by stress.", img: "/images/amla_fruit.png" },
+              { title: "Kalmegh", role: "Liver Care", desc: "Vitality Support: Rejuvenates the liver tissues and restores original metabolic pathways for energy.", img: "/images/kalmegh_herb.png" }
             ].map((ing, i) => (
               <motion.div 
                 key={ing.title}
