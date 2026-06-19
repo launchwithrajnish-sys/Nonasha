@@ -1,17 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Myriad Variable Concept", "Myriad Pro", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Cinzel", Georgia, serif;
   
-  --color-brand-dark: #1a240d;
-  --color-brand-leaf: #2d3a1a;
+  --color-brand-dark: #2b2871;
+  --color-brand-leaf: #4b3190;
   --color-gold: #c5a059;
 }
 
 @layer base {
   body {
     @apply font-sans antialiased bg-brand-dark text-white;
+    font-weight: 500; /* Medium-to-semibold baseline style for Myriad */
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-medium;
   }
 }
 

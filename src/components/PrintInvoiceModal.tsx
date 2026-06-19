@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Printer, FileText, Tag, Check, HelpCircle, CornerDownRight } from 'lucide-react';
+import { X, Printer, FileText, Tag, Check, HelpCircle, CornerDownRight, Download } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -38,11 +38,243 @@ interface PrintInvoiceModalProps {
 
 export default function PrintInvoiceModal({ isOpen, onClose, order }: PrintInvoiceModalProps) {
   const [activeTab, setActiveTab] = useState<'both' | 'invoice' | 'label'>('both');
+  const [includeContact, setIncludeContact] = useState(true);
+  const [includeNotes, setIncludeNotes] = useState(true);
+  const [customNotes, setCustomNotes] = useState('Standard Ayurvedic drops. Instructions: Take twice daily on empty stomach. Keep away from direct sunlight.');
 
   if (!isOpen) return null;
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPreview = () => {
+    const docDate = getFormattedDate();
+    const itemRows = order.items.map(item => `
+      <tr style="border-bottom: 1px solid #f0f0f0;">
+        <td style="padding: 12px 0;">
+          <strong style="color: #1f2937; display: block;">${item.name}</strong>
+          <span style="font-size: 9px; color: #9ca3af; text-transform: uppercase;">SKU: IND-${item.id.slice(0, 5)}</span>
+        </td>
+        <td style="padding: 12px 0; text-align: center; color: #6b7280; font-weight: bold;">${item.price} Rs</td>
+        <td style="padding: 12px 0; text-align: center; color: #1f2937; font-weight: bold;">${item.quantity}</td>
+        <td style="padding: 12px 0; text-align: right; color: #111827; font-weight: 900;">${item.price * item.quantity} Rs</td>
+      </tr>
+    `).join('');
+
+    const barcodeLines = Array.from({ length: 42 }).map((_, i) => {
+      const isSpace = i % 7 === 1 || i % 6 === 2;
+      const width = i % 3 === 0 ? '3px' : i % 5 === 0 ? '4px' : '1.5px';
+      return `<div style="width: ${width}; height: 100%; background: ${isSpace ? 'transparent' : '#0a0a0a'}; flex-shrink: 0;"></div>`;
+    }).join('');
+
+    const invoiceHTML = `
+      <div style="background: white; color: #1f2937; padding: 40px; border-radius: 32px; border: 1px solid #f0f0f0; margin-bottom: 40px; font-family: system-ui, sans-serif;">
+        <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 1px solid #f0f0f0; padding-bottom: 24px; margin-bottom: 24px;">
+          <div>
+            <h2 style="font-size: 24px; font-weight: 900; margin: 0; color: #111827; font-family: serif; font-style: italic;">NONASHA Wellness</h2>
+            <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #2e7d32; margin: 4px 0 0 0;">Pure Ayurvedic Vitality</p>
+            <p style="font-size: 10px; color: #9ca3af; text-transform: uppercase; margin: 16px 0 0 0; line-height: 1.5;">
+              717, Barakhamba Road, Connaught Place,<br />
+              New Delhi, 110001, India<br />
+              support@nonasha.com | +91 98100 12345
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 10px; font-weight: 900; background: #f9fafb; padding: 4px 12px; border-radius: 9999px; color: #6b7280; font-family: monospace;">TAX INVOICE</span>
+            <h3 style="font-size: 20px; font-weight: bold; margin: 16px 0 0 0;">Invoice No: #${order.id.slice(0, 8).toUpperCase()}</h3>
+            <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0 0;">Date: ${docDate}</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 40px; font-size: 11px; text-transform: uppercase;">
+          <div>
+            <p style="color: #9ca3af; font-weight: 900; margin: 0 0 8px 0; font-size: 9px;">Billed To</p>
+            <p style="font-weight: 950; font-size: 14px; color: #1f2937; margin: 0;">${order.shippingAddress?.fullName}</p>
+            ${includeContact ? `
+              <p style="color: #6b7280; margin: 4px 0 0 0;">${order.customerEmail}</p>
+              <p style="color: #6b7280; margin: 2px 0 0 0;">Phone: ${order.shippingAddress?.phone}</p>
+            ` : ''}
+          </div>
+          <div>
+            <p style="color: #9ca3af; font-weight: 900; margin: 0 0 8px 0; font-size: 9px;">Payment Details</p>
+            <p style="font-weight: 900; color: #1f2937; margin: 0;">Mode: ${order.paymentMethod === 'cod' ? 'CASH ON DELIVERY (COD)' : order.paymentMethod.toUpperCase()}</p>
+            <p style="color: #6b7280; margin: 4px 0 0 0;">Status: <span style="color: #2e7d32; font-weight: 900;">${order.status}</span></p>
+            <p style="color: #6b7280; margin: 4px 0 0 0;">Slot Pref: <span style="color: #1f2937; font-weight: 900;">${deliverySlot}</span></p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: ${includeNotes ? '1fr 1fr' : '1fr'}; gap: 24px; margin-bottom: 40px;">
+          <div style="background: #f9fafb; padding: 20px; border-radius: 16px; border: 1px solid #f3f4f6;">
+            <p style="color: #9ca3af; font-weight: 900; font-size: 9px; margin: 0 0 8px 0; text-transform: uppercase;">Shipping Destination</p>
+            <p style="font-weight: 900; font-size: 12px; color: #1f2937; margin: 0;">${order.shippingAddress?.fullName}</p>
+            <p style="color: #4b5563; font-size: 12px; margin: 4px 0 0 0; line-height: 1.5;">
+              ${order.shippingAddress?.address}<br />
+              ${order.shippingAddress?.city}, ${order.shippingAddress?.state} - ${order.shippingAddress?.zipCode}
+            </p>
+          </div>
+          ${includeNotes ? `
+            <div style="background: #f9fafb; padding: 20px; border-radius: 16px; border: 1px solid #f3f4f6;">
+              <p style="color: #9ca3af; font-weight: 900; font-size: 9px; margin: 0 0 8px 0; text-transform: uppercase;">Special Instructions / Notes</p>
+              <p style="color: #374151; font-size: 12px; margin: 0; line-height: 1.5; font-weight: 600;">
+                ${customNotes}
+              </p>
+            </div>
+          ` : ''}
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #e5e7eb; font-size: 9px; font-weight: 900; text-transform: uppercase; color: #9ca3af; text-align: left;">
+              <th style="padding-bottom: 12px;">Item Description</th>
+              <th style="padding-bottom: 12px; text-align: center; width: 96px;">Unit Price</th>
+              <th style="padding-bottom: 12px; text-align: center; width: 90px;">Quantity</th>
+              <th style="padding-bottom: 12px; text-align: right; width: 128px;">Total Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemRows}
+          </tbody>
+        </table>
+
+        <div style="display: flex; flex-direction: column; align-items: flex-end; border-top: 1px solid #f0f0f0; padding-top: 24px;">
+          <div style="width: 100%; max-width: 320px; font-size: 12px; font-family: sans-serif;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #6b7280; font-weight: bold;">
+              <span>Subtotal Weight / Val</span>
+              <span>${order.total} Rs</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #6b7280; font-weight: bold;">
+              <span>Shipping (Express COD)</span>
+              <span style="color: #2e7d32; font-weight: 900;">FREE</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #6b7280; font-weight: bold;">
+              <span>GST (Included 12%)</span>
+              <span>${(order.total * 0.12).toFixed(2)} Rs</span>
+            </div>
+            <div style="border-top: 1px solid #f0f0f0; padding-top: 12px; display: flex; justify-content: space-between; font-weight: 900; font-size: 16px; color: #111827;">
+              <span style="text-transform: uppercase;">Grand Total</span>
+              <span style="font-size: 20px;">${order.total} Rs</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px dashed #e5e7eb; margin-top: 48px; padding-top: 32px; text-align: center; font-size: 10px; color: #9ca3af; font-weight: bold; text-transform: uppercase; line-height: 1.5;">
+          <p>Thank you for choosing wellness. Ayurveda guidelines suggest taking drops regularly twice daily.</p>
+          <p style="margin-top: 4px; font-size: 8px; color: #d1d5db;">This is a system-generated electronic invoice, signature not required.</p>
+        </div>
+      </div>
+    `;
+
+    const labelHTML = `
+      <div style="background: white; color: #1f2937; padding: 40px; border-radius: 32px; border: 4px double #111827; max-width: 600px; margin: 40px auto; font-family: system-ui, sans-serif;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #111827; padding-bottom: 20px; margin-bottom: 20px;">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 900; margin: 0;">NONASHA&trade; SHIPMENT</h2>
+            <p style="font-size: 8px; font-weight: 900; text-transform: uppercase; color: #6b7280; margin: 4px 0 0 0;">Logistics & Delivery Desk</p>
+          </div>
+          <div style="background: #0a0a0a; color: white; padding: 8px 16px; border-radius: 12px; text-align: center;">
+            <p style="font-size: 8px; font-weight: 900; text-transform: uppercase; margin: 0;">Payment Mode</p>
+            <p style="font-weight: 900; font-size: 14px; margin: 4px 0 0 0;">${order.paymentMethod.toUpperCase()}</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 24px; margin-bottom: 24px; font-size: 11px;">
+          <div style="border-right: 1px solid #e5e7eb; padding-right: 16px;">
+            <p style="color: #9ca3af; font-weight: 900; font-size: 8px; text-transform: uppercase; margin: 0 0 8px 0;">Shipped From</p>
+            <p style="font-weight: bold; font-size: 12px; margin: 0; color: #1f2937;">NONASHA Wellness Dispatch</p>
+            <p style="color: #6b7280; line-height: 1.5; margin: 4px 0 0 0;">
+              717, Barakhamba Road, Connaught Place,<br />
+              New Delhi, 110001, India<br />
+              Phone: +91 98100 12345
+            </p>
+          </div>
+          <div>
+            <p style="color: #9ca3af; font-weight: 900; font-size: 8px; text-transform: uppercase; margin: 0 0 8px 0;">Deliver To</p>
+            <p style="font-weight: 900; font-size: 14px; margin: 0; text-transform: uppercase; color: #0a0a0a;">${order.shippingAddress?.fullName}</p>
+            <p style="color: #1f2937; line-height: 1.5; margin: 4px 0 0 0;">
+              ${order.shippingAddress?.address}<br />
+              ${order.shippingAddress?.city}, ${order.shippingAddress?.state}<br />
+              <span style="font-weight: 900; font-size: 14px; display: block; margin-top: 4px;">PIN: ${order.shippingAddress?.zipCode}</span>
+            </p>
+            ${includeContact ? `
+              <p style="font-weight: 900; color: #0a0a0a; margin: 8px 0 0 0;">📞 TEL: ${order.shippingAddress?.phone}</p>
+            ` : ''}
+          </div>
+        </div>
+
+        <div style="background: #f3f4f6; border: 2px dashed #111827; padding: 20px; border-radius: 16px; text-align: center; margin: 24px 0;">
+          <span style="background: #0a0a0a; color: white; padding: 4px 12px; border-radius: 9999px; font-size: 8.5px; font-weight: 900; text-transform: uppercase;">⏰ PREFERRED DELIVERY TIME WINDOW</span>
+          <h4 style="font-size: 16px; font-weight: 900; color: #0a0a0a; margin: 8px 0 0 0;">${deliverySlot}</h4>
+          <p style="font-size: 9px; font-weight: bold; color: #6b7280; text-transform: uppercase; margin: 6px 0 0 0;">Fulfillment agent: Please prioritize this range as specified by the customer during checkout.</p>
+        </div>
+
+        ${includeNotes ? `
+          <div style="background: #fffbef; border: 1px solid #fef3c7; padding: 16px; border-radius: 12px; text-align: left; margin: 16px 0;">
+            <p style="color: #b45309; font-weight: 900; font-size: 8px; text-transform: uppercase; margin: 0 0 4px 0;">📋 Dispatcher Notes</p>
+            <p style="font-size: 12px; font-weight: 600; color: #1f2937; margin: 0; line-height: 1.5;">${customNotes}</p>
+          </div>
+        ` : ''}
+
+        <div style="border-top: 2px solid #111827; padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="width: 100%; max-width: 280px;">
+            <div style="display: flex; height: 48px; border: 1px solid #e5e7eb; padding: 4px; border-radius: 4px; background: #f9fafb; align-items: flex-end; gap: 2px; justify-content: center;">
+              ${barcodeLines}
+            </div>
+            <p style="font-size: 9px; letter-spacing: 0.35em; font-weight: 900; text-align: center; margin: 4px 0 0 0; color: #111827;">*NNS-${order.id.slice(0, 8).toUpperCase()}-COD*</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="font-size: 7px; font-weight: 950; color: #9ca3af; text-transform: uppercase; margin: 0;">Parcel Contents</p>
+            <p style="font-size: 10px; font-weight: 905; color: #1f2937; margin: 2px 0 0 0; text-transform: uppercase;">
+              ${order.items.map(it => `${it.quantity}x ${it.name.split(' ')[0]}`).join(', ')}
+            </p>
+            <p style="font-size: 7.5px; font-weight: bold; color: #9ca3af; margin: 4px 0 0 0; text-transform: uppercase;">Weight: 0.150 KG | Box A</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 12px; display: flex; justify-content: space-between; font-size: 7.5px; font-weight: bold; color: #9ca3af; text-transform: uppercase;">
+          <span>Authorized Dispatch Stamp</span>
+          <span>Delhi Reg. Hub-4</span>
+        </div>
+      </div>
+    `;
+
+    const finalHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Fulfillment Document Preview - Order #${order.id.toUpperCase()}</title>
+          <style>
+            body { background-color: #f3f4f6; padding: 40px; margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+            .container { width: 100%; max-width: 800px; }
+            @media print {
+              body { background-color: white; padding: 0; }
+              .no-print { display: none !important; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="margin-bottom: 24px; display: flex; gap: 12px; align-items: center;">
+            <button onclick="window.print()" style="padding: 12px 24px; background: #2e7d32; color: white; border: none; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em;">Print Document</button>
+            <span style="font-size: 12px; color: #4b5563;">Status: Active Preview Toggled (Contact Info: ${includeContact ? 'YES' : 'NO'}, Notes: ${includeNotes ? 'YES' : 'NO'})</span>
+          </div>
+          <div class="container">
+            ${(activeTab === 'both' || activeTab === 'invoice') ? invoiceHTML : ''}
+            ${(activeTab === 'both' || activeTab === 'label') ? labelHTML : ''}
+          </div>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([finalHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `fulfillment_preview_order_${order.id}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const getFormattedDate = () => {
@@ -165,6 +397,77 @@ export default function PrintInvoiceModal({ isOpen, onClose, order }: PrintInvoi
         {/* Modal Scrollable Workspace area with preview */}
         <div className="flex-1 overflow-y-auto p-6 md:p-12 bg-neutral-950/70 space-y-12">
           
+          {/* Admin Control Settings Cockpit */}
+          <div className="max-w-3xl mx-auto bg-neutral-900 border border-white/5 rounded-[28px] p-6 text-white space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-leaf">Fulfillment Customizer</h4>
+                <p className="text-[10px] text-neutral-400 mt-1 uppercase tracking-wider font-medium">Configure print outputs dynamically before sending to printer or downloading</p>
+              </div>
+
+              {/* Download Preview Button */}
+              <button
+                onClick={handleDownloadPreview}
+                className="flex items-center justify-center gap-2 bg-neutral-800 hover:bg-neutral-700 border border-white/10 hover:border-white/20 text-white min-h-[44px] px-5 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] active:translate-y-0.5 transition-all"
+                title="Download self-contained HTML offline document preview"
+              >
+                <Download size={14} className="text-brand-leaf animate-pulse" /> Download Preview
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-5 border-t border-white/5">
+              {/* Toggles */}
+              <div className="space-y-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-neutral-400">Content Toggles</p>
+                
+                <div className="flex items-center justify-between bg-neutral-950/40 p-3.5 rounded-xl border border-white/5">
+                  <span className="text-xs font-bold text-neutral-300">Customer Contact Info</span>
+                  <button
+                    onClick={() => setIncludeContact(!includeContact)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      includeContact ? 'bg-brand-leaf' : 'bg-neutral-700'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        includeContact ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between bg-neutral-950/40 p-3.5 rounded-xl border border-white/5">
+                  <span className="text-xs font-bold text-neutral-300">Dispatcher & Guide Notes</span>
+                  <button
+                    onClick={() => setIncludeNotes(!includeNotes)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      includeNotes ? 'bg-brand-leaf' : 'bg-neutral-700'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        includeNotes ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Notes Field Editor */}
+              <div className="space-y-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-neutral-400">Dynamic Order Notes (Editable)</p>
+                <textarea
+                  rows={2}
+                  value={customNotes}
+                  onChange={(e) => setCustomNotes(e.target.value)}
+                  disabled={!includeNotes}
+                  placeholder="Enter custom instructions or delivery guidelines for this dispatch..."
+                  className="w-full bg-neutral-950 border border-white/10 p-3 rounded-xl font-medium text-xs focus:outline-none focus:border-brand-leaf/40 text-neutral-200 transition-all placeholder:text-neutral-600 disabled:opacity-40 disabled:cursor-not-allowed resize-none"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Printable Container wrapper */}
           <div className="printable-card flex flex-col gap-10 max-w-3xl mx-auto">
             
@@ -196,8 +499,12 @@ export default function PrintInvoiceModal({ isOpen, onClose, order }: PrintInvoi
                   <div>
                     <p className="font-black text-neutral-400 text-[9px] uppercase tracking-[0.2em] mb-2">Billed To</p>
                     <p className="font-black text-sm text-neutral-800 tracking-tight">{order.shippingAddress?.fullName}</p>
-                    <p className="font-bold text-neutral-500 mt-1">{order.customerEmail}</p>
-                    <p className="font-bold text-neutral-500 mt-0.5">Phone: {order.shippingAddress?.phone}</p>
+                    {includeContact && (
+                      <>
+                        <p className="font-bold text-neutral-500 mt-1">{order.customerEmail}</p>
+                        <p className="font-bold text-neutral-500 mt-0.5">Phone: {order.shippingAddress?.phone}</p>
+                      </>
+                    )}
                   </div>
                   <div>
                     <p className="font-black text-neutral-400 text-[9px] uppercase tracking-[0.2em] mb-2">Payment Details</p>
@@ -208,16 +515,28 @@ export default function PrintInvoiceModal({ isOpen, onClose, order }: PrintInvoi
                   </div>
                 </div>
 
-                {/* Delivery Address box */}
-                <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-100 mb-10">
-                  <p className="font-black text-neutral-400 text-[9px] uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-leaf"></span> Shipping Destination
-                  </p>
-                  <p className="font-black text-neutral-800 text-xs tracking-tight">{order.shippingAddress?.fullName}</p>
-                  <p className="font-bold text-neutral-600 mt-1 leading-relaxed text-xs">
-                    {order.shippingAddress?.address}<br />
-                    {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.zipCode}
-                  </p>
+                {/* Delivery Address box with optional Notes */}
+                <div className={`grid grid-cols-1 ${includeNotes ? 'md:grid-cols-2' : ''} gap-6 mb-10`}>
+                  <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-100">
+                    <p className="font-black text-neutral-400 text-[9px] uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-leaf"></span> Shipping Destination
+                    </p>
+                    <p className="font-black text-neutral-800 text-xs tracking-tight">{order.shippingAddress?.fullName}</p>
+                    <p className="font-bold text-neutral-600 mt-1 leading-relaxed text-xs">
+                      {order.shippingAddress?.address}<br />
+                      {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.zipCode}
+                    </p>
+                  </div>
+                  {includeNotes && (
+                    <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-100">
+                      <p className="font-black text-neutral-400 text-[9px] uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Special Instructions
+                      </p>
+                      <p className="font-semibold text-neutral-700 text-xs leading-relaxed mt-1">
+                        {customNotes}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Invoice Table list */}
@@ -314,9 +633,11 @@ export default function PrintInvoiceModal({ isOpen, onClose, order }: PrintInvoi
                       {order.shippingAddress?.city}, {order.shippingAddress?.state}<br />
                       <span className="font-black text-sm text-neutral-950 mt-1 block">PIN: {order.shippingAddress?.zipCode}</span>
                     </p>
-                    <p className="text-[10px] font-black text-neutral-950 mt-2 flex items-center gap-1">
-                      📞 TEL: {order.shippingAddress?.phone}
-                    </p>
+                    {includeContact && (
+                      <p className="text-[10px] font-black text-neutral-950 mt-2 flex items-center gap-1">
+                        📞 TEL: {order.shippingAddress?.phone}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -332,6 +653,13 @@ export default function PrintInvoiceModal({ isOpen, onClose, order }: PrintInvoi
                     Fulfillment agent: Please prioritize this range as specified by the customer during checkout.
                   </p>
                 </div>
+
+                {includeNotes && (
+                  <div className="bg-neutral-50 border border-neutral-300 p-4 rounded-xl text-left text-brand-dark mb-6">
+                    <p className="font-black text-[8px] uppercase tracking-[0.15em] text-neutral-400 mb-1">📋 Dispatcher Notes</p>
+                    <p className="text-xs font-semibold text-neutral-800 leading-relaxed">{customNotes}</p>
+                  </div>
+                )}
 
                 {/* Layout QR Code / Barcode visualization stamp */}
                 <div className="border-t-2 border-neutral-900 pt-6 flex flex-col sm:flex-row items-center justify-between gap-6">
