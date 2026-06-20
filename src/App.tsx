@@ -580,7 +580,13 @@ function AppContent() {
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="w-full h-full relative z-10"
                >
-                 <img src="/images/product_main.png" alt="Mechanism Preview" className="w-full h-full object-cover" />
+                 <img 
+                   id="mechanism-product-img"
+                   src="/images/mechanism_product.jpg" 
+                   alt="Mechanism Preview" 
+                   className="w-full h-full object-cover" 
+                   referrerPolicy="no-referrer"
+                 />
                </motion.div>
             </div>
           </div>
