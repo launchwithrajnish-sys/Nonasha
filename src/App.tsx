@@ -67,7 +67,7 @@ function AppContent() {
       name: 'NONASHA™ Anti Addiction Drops',
       price: 799,
       quantity: 1,
-      image: '/cartimg/Untitled design (7).png',
+      image: '/images/product_main.png',
       size: '30ml bottle'
     }
   ]);
@@ -378,7 +378,7 @@ function AppContent() {
                       id: '1',
                       name: 'NONASHA™ Anti Addiction Drops',
                       price: 799,
-                      image: '/cartimg/Untitled design (7).png',
+                      image: '/images/product_main.png',
                       size: '30ml bottle'
                     })} 
                     whileHover={{ scale: 1.02 }} 
@@ -454,11 +454,13 @@ function AppContent() {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} className="aspect-square bg-neutral-50 rounded-[64px] overflow-hidden border border-neutral-100 flex items-center justify-center shadow-[0_40px_100px_-20px_rgba(0,0,0,0.05)] relative group">
                 <div className="absolute inset-0 bg-brand-leaf/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                 <motion.img 
+                  id="transformation-product-img"
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  src="/cartimg/Untitled design (7).png" 
+                  src="/images/transformation_product.jpg" 
                   alt="Nonasha Product" 
                   className="w-full h-full object-cover relative z-10" 
+                  referrerPolicy="no-referrer"
                 />
             </motion.div>
         </div>
@@ -578,7 +580,7 @@ function AppContent() {
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="w-full h-full relative z-10"
                >
-                 <img src="/cartimg/Untitled design (7).png" alt="Mechanism Preview" className="w-full h-full object-cover" />
+                 <img src="/images/product_main.png" alt="Mechanism Preview" className="w-full h-full object-cover" />
                </motion.div>
             </div>
           </div>
